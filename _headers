@@ -1,10 +1,25 @@
-/* NOTE:
-  Cache all assets for 1 year
-  Change filename (e.g. bg-v2.png) to bust cache when needed
-  Applies to everything (Generic)
-*/
-
+# ========================
+# GLOBAL HEADERS (default)
+# ========================
+# - Cache assets for 1 year
+# - Immutable = never revalidate unless URL changes (e.g. cache busting by changing filename/path)
+# - CORS allowed
+  
 /*
   Cache-Control: public, max-age=31536000, immutable
   Access-Control-Allow-Origin: *
   X-Content-Type-Options: nosniff
+
+
+# ==================================
+# OVERRIDDEN HEADERS (for beta-apps)
+# ==================================
+# - Lower cache duration for quicker updates
+# - Must-revalidate = revalidate before using cached version (i.e. selects latest version)
+# - You can change or remove this section once app is stable
+
+# /app2/*
+#   Cache-Control: public, max-age=300, must-revalidate
+
+/google-custom-search/*
+  Cache-Control: public, max-age=60, must-revalidate
