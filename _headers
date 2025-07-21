@@ -1,25 +1,32 @@
-# ========================
-# GLOBAL HEADERS (default)
-# ========================
-# - Cache assets for 1 year
-# - Immutable = never revalidate unless URL changes (e.g. cache busting by changing filename/path)
-# - CORS allowed
-  
+#  ===================
+#    GLOBAL HEADERS
+#  ===================
+
 /*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public
   Access-Control-Allow-Origin: *
   X-Content-Type-Options: nosniff
 
 
-# ==================================
-# OVERRIDDEN HEADERS (for beta-apps)
-# ==================================
-# - Lower cache duration for quicker updates
-# - Must-revalidate = revalidate before using cached version (i.e. selects latest version)
-# - You can change or remove this section once app is stable
+#  ==================== 
+#    SPECIFIC HEADERS
+#  ====================
 
-# /app2/*
-#   Cache-Control: public, max-age=300, must-revalidate
+/shared/*
+  Cache-Control: max-age=31536000, immutable 
 
 /google-custom-search/*
-  Cache-Control: public, max-age=60, must-revalidate
+  Cache-Control: max-age=60, must-revalidate
+
+# /app2/*
+#   Cache-Control: max-age=300, must-revalidate
+
+
+#  ==============
+#    SIDE-NOTES
+#  ==============
+# - Must-revalidate = revalidate before using cached version (i.e. selects latest version)
+# - Immutable = never revalidate unless URL changes (e.g. cache busting by changing filename/path)
+# - 31536000 = cache assets for 1 year (in max-age)
+# - 60 = lower cache duration for quicker updates (in max-age)
+# - CORS allowed (for all assets)
