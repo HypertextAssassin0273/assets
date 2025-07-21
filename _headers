@@ -1,0 +1,10 @@
+/* NOTE:
+  Cache all assets for 1 year
+  Change filename (e.g. bg-v2.png) to bust cache when needed
+  Applies to everything (Generic)
+*/
+
+/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+  X-Content-Type-Options: nosniff
