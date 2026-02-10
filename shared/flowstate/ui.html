@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>FlowState</title>
+<style>
+body {
+  margin: 0;
+  padding: 10px;
+  font-family: system-ui;
+  background: #0e0e0e;
+  color: #eee;
+}
+
+h3 {
+  margin: 0 0 8px;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px;
+  background: #2563eb;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+<h3>Suspend Groups</h3>
+<div id="groups"></div>
+<button id="suspend">Suspend Selected</button>
+
+<script>
+const groupsDiv = document.getElementById("groups");
+
+chrome.runtime.sendMessage({ action: "list-groups" }, groups => {
+  groups.forEach(g => {
+    const row = document.createElement("div");
+    row.className = "group";
+    row.innerHTML = `
+      <input type="checkbox" value="${g.id}">
+      <span style="margin-left:6px">${g.title || "(untitled)"}</span>
+    `;
+    groupsDiv.appendChild(row);
+  });
+});
+
+document.getElementById("suspend").onclick = () => {
+  const ids = [...document.querySelectorAll("input:checked")].map(i => +i.value);
+  chrome.runtime.sendMessage({ action: "suspend-groups", ids });
+  window.close();
+};
+</script>
+</body>
+</html>
+
