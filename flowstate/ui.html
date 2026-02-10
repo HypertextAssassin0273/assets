@@ -65,10 +65,10 @@ window.parent.postMessage({ type:"list-groups" }, "*");
 window.addEventListener("message", e => {
   if (e.data.type !== "groups") return;
 
-  const groups = e.data.groups || [];
+  const { groups, activeGroupId } = e.data;
   groupsDiv.innerHTML = "";
 
-  if (groups.length === 0) {
+  if (!groups || groups.length === 0) {
     emptyMsg.style.display = "block";
     suspendBtn.disabled = true;
     return;
@@ -79,10 +79,14 @@ window.addEventListener("message", e => {
   groups.forEach(g => {
     const row = document.createElement("div");
     row.className = "group";
+
+    const checked = g.id === activeGroupId ? "checked" : "";
+
     row.innerHTML = `
-      <input type="checkbox" value="${g.id}">
+      <input type="checkbox" value="${g.id}" ${checked}>
       <span style="margin-left:6px">${g.title || "(untitled)"}</span>
     `;
+
     groupsDiv.appendChild(row);
   });
 
