@@ -12,9 +12,7 @@ body {
   color: #eee;
 }
 
-h3 {
-  margin: 0 0 8px;
-}
+h3 { margin: 0 0 8px; }
 
 .group {
   display: flex;
@@ -42,8 +40,14 @@ button {
 <script>
 const groupsDiv = document.getElementById("groups");
 
-chrome.runtime.sendMessage({ action: "list-groups" }, groups => {
-  groups.forEach(g => {
+// Ask popup for groups
+window.parent.postMessage({ type: "list-groups" }, "*");
+
+// Receive group list
+window.addEventListener("message", e => {
+  if (e.data.type !== "groups") return;
+
+  e.data.groups.forEach(g => {
     const row = document.createElement("div");
     row.className = "group";
     row.innerHTML = `
@@ -54,12 +58,11 @@ chrome.runtime.sendMessage({ action: "list-groups" }, groups => {
   });
 });
 
+// Suspend button
 document.getElementById("suspend").onclick = () => {
   const ids = [...document.querySelectorAll("input:checked")].map(i => +i.value);
-  chrome.runtime.sendMessage({ action: "suspend-groups", ids });
-  window.close();
+  window.parent.postMessage({ type: "suspend-groups", ids }, "*");
 };
 </script>
 </body>
 </html>
-
