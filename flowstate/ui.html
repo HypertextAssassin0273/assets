@@ -3,49 +3,52 @@
 <head>
 <meta charset="utf-8">
 <title>FlowState</title>
+
 <style>
 body {
-  margin: 0;
-  padding: 10px;
-  font-family: system-ui;
-  background: #0e0e0e;
-  color: #eee;
+  margin:0;
+  padding:10px;
+  font-family:system-ui;
+  background:#0e0e0e;
+  color:#eee;
 }
 
-h3 { margin: 0 0 8px; }
-
 .group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 6px;
+  display:flex;
+  align-items:center;
+  margin-bottom:6px;
 }
 
 button {
-  margin-top: 10px;
-  width: 100%;
-  padding: 6px;
-  background: #2563eb;
-  border: none;
-  color: white;
-  cursor: pointer;
+  margin-top:10px;
+  width:100%;
+  padding:6px;
+  background:#2563eb;
+  border:none;
+  color:white;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 <h3>Suspend Groups</h3>
+
 <div id="groups"></div>
+
 <button id="suspend">Suspend Selected</button>
 
 <script>
 const groupsDiv = document.getElementById("groups");
 
-// Ask popup for groups
-window.parent.postMessage({ type: "list-groups" }, "*");
+// ask popup for groups
+window.parent.postMessage({ type:"list-groups" }, "*");
 
-// Receive group list
+// receive groups
 window.addEventListener("message", e => {
   if (e.data.type !== "groups") return;
+
+  groupsDiv.innerHTML = "";
 
   e.data.groups.forEach(g => {
     const row = document.createElement("div");
@@ -58,11 +61,12 @@ window.addEventListener("message", e => {
   });
 });
 
-// Suspend button
+// suspend
 document.getElementById("suspend").onclick = () => {
   const ids = [...document.querySelectorAll("input:checked")].map(i => +i.value);
-  window.parent.postMessage({ type: "suspend-groups", ids }, "*");
+  window.parent.postMessage({ type:"suspend-groups", ids }, "*");
 };
 </script>
+
 </body>
 </html>
