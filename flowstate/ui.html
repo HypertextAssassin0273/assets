@@ -34,7 +34,7 @@ button:disabled {
   cursor:not-allowed;
 }
 
-#empty {
+#empty, #noop {
   opacity:0.6;
   margin-bottom:10px;
 }
@@ -45,9 +45,8 @@ button:disabled {
 
 <h3>Suspend Groups</h3>
 
-<div id="empty" style="display:none;">
-  No active tab groups found.
-</div>
+<div id="empty" style="display:none;">No active tab groups found.</div>
+<div id="noop" style="display:none;">Groups already suspended.</div>
 
 <div id="groups"></div>
 
@@ -56,6 +55,7 @@ button:disabled {
 <script>
 const groupsDiv = document.getElementById("groups");
 const emptyMsg = document.getElementById("empty");
+const noopMsg = document.getElementById("noop");
 const suspendBtn = document.getElementById("suspend");
 
 // Ask popup for groups
@@ -63,40 +63,48 @@ window.parent.postMessage({ type:"list-groups" }, "*");
 
 // Receive groups
 window.addEventListener("message", e => {
-  if (e.data.type !== "groups") return;
 
-  const { groups, activeGroupId } = e.data;
-  groupsDiv.innerHTML = "";
+  if (e.data.type === "groups") {
+    const { groups, activeGroupId } = e.data;
+    groupsDiv.innerHTML = "";
+    noopMsg.style.display = "none";
 
-  if (!groups || groups.length === 0) {
-    emptyMsg.style.display = "block";
-    suspendBtn.disabled = true;
-    return;
+    if (!groups || groups.length === 0) {
+      emptyMsg.style.display = "block";
+      suspendBtn.disabled = true;
+      return;
+    }
+
+    emptyMsg.style.display = "none";
+
+    groups.forEach(g => {
+      const row = document.createElement("div");
+      row.className = "group";
+      const checked = g.id === activeGroupId ? "checked" : "";
+      row.innerHTML = `
+        <input type="checkbox" value="${g.id}" ${checked}>
+        <span style="margin-left:6px">${g.title || "(untitled)"}</span>
+      `;
+      groupsDiv.appendChild(row);
+    });
+
+    suspendBtn.disabled = false;
   }
 
-  emptyMsg.style.display = "none";
-
-  groups.forEach(g => {
-    const row = document.createElement("div");
-    row.className = "group";
-
-    const checked = g.id === activeGroupId ? "checked" : "";
-
-    row.innerHTML = `
-      <input type="checkbox" value="${g.id}" ${checked}>
-      <span style="margin-left:6px">${g.title || "(untitled)"}</span>
-    `;
-
-    groupsDiv.appendChild(row);
-  });
-
-  suspendBtn.disabled = false;
+  if (e.data.type === "suspend-result") {
+    if (!e.data.didWork) {
+      noopMsg.style.display = "block";
+    } else {
+      window.close();
+    }
+  }
 });
 
 // Suspend selected groups
 suspendBtn.onclick = () => {
   const ids = [...document.querySelectorAll("input:checked")].map(i => +i.value);
   if (!ids.length) return;
+  noopMsg.style.display = "none";
   window.parent.postMessage({ type:"suspend-groups", ids }, "*");
 };
 </script>
