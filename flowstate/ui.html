@@ -17,6 +17,11 @@ body {
   display:flex;
   align-items:center;
   margin-bottom:6px;
+  opacity:1;
+}
+
+.group.disabled {
+  opacity:0.4;
 }
 
 button {
@@ -63,15 +68,12 @@ const emptyMsg = document.getElementById("empty");
 const noopMsg = document.getElementById("noop");
 const suspendBtn = document.getElementById("suspend");
 
-// Ask popup for groups
 window.parent.postMessage({ type:"list-groups" }, "*");
 
-function updateButtonState() {
-  const checked = document.querySelectorAll("input:checked").length;
-  suspendBtn.disabled = checked === 0;
+function updateButton() {
+  suspendBtn.disabled = !document.querySelectorAll("input:checked").length;
 }
 
-// Receive groups
 window.addEventListener("message", e => {
 
   if (e.data.type === "groups") {
@@ -80,7 +82,7 @@ window.addEventListener("message", e => {
     groupsDiv.innerHTML = "";
     noopMsg.style.display = "none";
 
-    if (!groups || groups.length === 0) {
+    if (!groups || !groups.length) {
       emptyMsg.style.display = "block";
       suspendBtn.disabled = true;
       return;
@@ -90,19 +92,23 @@ window.addEventListener("message", e => {
 
     groups.forEach(g => {
       const row = document.createElement("div");
-      row.className = "group";
-      const checked = g.id === activeGroupId ? "checked" : "";
+      row.className = "group" + (g._suspended ? " disabled" : "");
+
+      const checked = (!g._suspended && g.id === activeGroupId) ? "checked" : "";
+      const disabled = g._suspended ? "disabled" : "";
 
       row.innerHTML = `
-        <input type="checkbox" value="${g.id}" ${checked}>
+        <input type="checkbox" value="${g.id}" ${checked} ${disabled}>
         <span style="margin-left:6px">${g.title || "(untitled)"}</span>
       `;
 
-      row.querySelector("input").addEventListener("change", updateButtonState);
+      const cb = row.querySelector("input");
+      if (!g._suspended) cb.addEventListener("change", updateButton);
+
       groupsDiv.appendChild(row);
     });
 
-    updateButtonState();
+    updateButton();
   }
 
   if (e.data.type === "suspend-result") {
@@ -114,7 +120,6 @@ window.addEventListener("message", e => {
   }
 });
 
-// Suspend selected groups
 suspendBtn.onclick = () => {
   const ids = [...document.querySelectorAll("input:checked")].map(i => +i.value);
   if (!ids.length) return;
