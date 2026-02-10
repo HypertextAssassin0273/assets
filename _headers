@@ -13,14 +13,14 @@
 #  ====================
 
 /shared/*
-/flowstate/*
+/google-custom-search/*
   Cache-Control: max-age=31536000, immutable 
 
-/google-custom-search/*
+/flowstate/*
   Cache-Control: max-age=60, must-revalidate
 
 # /app2/*
-#   Cache-Control: max-age=300, must-revalidate
+#   Cache-Control: max-age=60, must-revalidate
 
 
 #  ==============
