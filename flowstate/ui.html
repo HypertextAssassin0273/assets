@@ -28,29 +28,55 @@ button {
   color:white;
   cursor:pointer;
 }
+
+button:disabled {
+  opacity:0.4;
+  cursor:not-allowed;
+}
+
+#empty {
+  opacity:0.6;
+  margin-bottom:10px;
+}
 </style>
 </head>
 
 <body>
+
 <h3>Suspend Groups</h3>
+
+<div id="empty" style="display:none;">
+  No active tab groups found.
+</div>
 
 <div id="groups"></div>
 
-<button id="suspend">Suspend Selected</button>
+<button id="suspend" disabled>Suspend Selected</button>
 
 <script>
 const groupsDiv = document.getElementById("groups");
+const emptyMsg = document.getElementById("empty");
+const suspendBtn = document.getElementById("suspend");
 
-// ask popup for groups
+// Ask popup for groups
 window.parent.postMessage({ type:"list-groups" }, "*");
 
-// receive groups
+// Receive groups
 window.addEventListener("message", e => {
   if (e.data.type !== "groups") return;
 
+  const groups = e.data.groups || [];
   groupsDiv.innerHTML = "";
 
-  e.data.groups.forEach(g => {
+  if (groups.length === 0) {
+    emptyMsg.style.display = "block";
+    suspendBtn.disabled = true;
+    return;
+  }
+
+  emptyMsg.style.display = "none";
+
+  groups.forEach(g => {
     const row = document.createElement("div");
     row.className = "group";
     row.innerHTML = `
@@ -59,11 +85,14 @@ window.addEventListener("message", e => {
     `;
     groupsDiv.appendChild(row);
   });
+
+  suspendBtn.disabled = false;
 });
 
-// suspend
-document.getElementById("suspend").onclick = () => {
+// Suspend selected groups
+suspendBtn.onclick = () => {
   const ids = [...document.querySelectorAll("input:checked")].map(i => +i.value);
+  if (!ids.length) return;
   window.parent.postMessage({ type:"suspend-groups", ids }, "*");
 };
 </script>
