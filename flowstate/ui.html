@@ -27,6 +27,11 @@ button {
   border:none;
   color:white;
   cursor:pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background:#3b82f6;
 }
 
 button:disabled {
@@ -61,11 +66,17 @@ const suspendBtn = document.getElementById("suspend");
 // Ask popup for groups
 window.parent.postMessage({ type:"list-groups" }, "*");
 
+function updateButtonState() {
+  const checked = document.querySelectorAll("input:checked").length;
+  suspendBtn.disabled = checked === 0;
+}
+
 // Receive groups
 window.addEventListener("message", e => {
 
   if (e.data.type === "groups") {
     const { groups, activeGroupId } = e.data;
+
     groupsDiv.innerHTML = "";
     noopMsg.style.display = "none";
 
@@ -81,14 +92,17 @@ window.addEventListener("message", e => {
       const row = document.createElement("div");
       row.className = "group";
       const checked = g.id === activeGroupId ? "checked" : "";
+
       row.innerHTML = `
         <input type="checkbox" value="${g.id}" ${checked}>
         <span style="margin-left:6px">${g.title || "(untitled)"}</span>
       `;
+
+      row.querySelector("input").addEventListener("change", updateButtonState);
       groupsDiv.appendChild(row);
     });
 
-    suspendBtn.disabled = false;
+    updateButtonState();
   }
 
   if (e.data.type === "suspend-result") {
